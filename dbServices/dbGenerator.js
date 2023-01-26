@@ -4,7 +4,7 @@ const {faker} = require('@faker-js/faker');
 ROWS = 10;
 
 const seedProducts = async() => {
-    for(i = 0; i < ROWS; i++){
+    for(let i = 0; i < ROWS; i++){
         manufacturer = faker.company.name();
         productName = faker.commerce.product();
 
@@ -50,10 +50,65 @@ const seedProductsTable = async() =>{
         await dpConnector.query(createTableQuery);
         
         seedProducts();
-        await dpConnector.query("SELECT * FROM Products");
+        
+    } catch (err) {
+        console.error(err.message);
+    }
+}
+
+const seedSalespersons = async() => {
+    for(let i = 0; i < ROWS; i++){
+        firstName = faker.name.firstName();
+        lastName = faker.name.lastName();
+        address = faker.address.streetAddress();
+        phone = faker.phone.number('###-###-####');         
+        startDate = faker.date.between('2013-03-01T00:00:00.000Z','2023-01-26T00:00:00.000Z').toISOString().split('T')[0];
+        terminationDate = faker.date.between(startDate,'2023-01-26T00:00:00.000Z').toISOString().split('T')[0];
+        manager = faker.name.fullName();
+
+        await dpConnector.query(`
+        INSERT INTO Salesperson (
+            First_Name,
+            Last_Name,
+            Address,
+            Phone,
+            Start_Date,
+            Termination_Date,
+            Manager
+        )
+        VALUES (
+            "${firstName}",
+            "${lastName}",
+            "${address}",
+            "${phone}",
+            "${startDate}",
+            "${terminationDate}",
+            "${manager}"
+        );
+        `);
+    }
+}
+
+const seedSalespersonsTable = async() =>{    
+    try {
+        const dropTableQuery = `DROP TABLE IF EXISTS Salesperson`;
+        const createTableQuery = `CREATE TABLE Salesperson (
+            ID INT UNIQUE PRIMARY KEY AUTO_INCREMENT,
+            First_Name TEXT,
+            Last_Name TEXT,
+            Address TEXT,
+            Phone TEXT,
+            Start_Date DATE,
+            Termination_Date DATE,
+            Manager TEXT
+            )`;
+        await dpConnector.query(dropTableQuery);
+        await dpConnector.query(createTableQuery);
+        seedSalespersons();
         
     } catch (err) {
         console.error(err.message);
     }
 }
 seedProductsTable();
+seedSalespersonsTable();

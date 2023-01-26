@@ -1,0 +1,26 @@
+{
+  "name": "bespoked-seed",
+  "version": "1.0.0",
+  "description": "Seeding utility for bespoked web application. Expected to seed DB isntance.",
+  "main": "index.js",
+  "scripts": {
+    "test": "seed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Denz1994/bespoked-seed.git"
+  },
+  "author": "denz1994",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Denz1994/bespoked-seed/issues"
+  },
+  "homepage": "https://github.com/Denz1994/bespoked-seed#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mysql2": "^3.0.1"
+  },
+  "devDependencies": {
+  }
+}

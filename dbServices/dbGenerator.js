@@ -110,5 +110,54 @@ const seedSalespersonsTable = async() =>{
         console.error(err.message);
     }
 }
+
+const seedCustomers = async() => {
+    for(let i = 0; i < ROWS; i++){
+        firstName = faker.name.firstName();
+        lastName = faker.name.lastName();
+        address = faker.address.streetAddress();
+        phone = faker.phone.number('###-###-####');         
+        startDate = faker.date.between('2013-03-01T00:00:00.000Z','2023-01-26T00:00:00.000Z').toISOString().split('T')[0];
+
+        await dpConnector.query(`
+        INSERT INTO Customers (
+            First_Name,
+            Last_Name,
+            Address,
+            Phone,
+            Start_Date
+        )
+        VALUES (
+            "${firstName}",
+            "${lastName}",
+            "${address}",
+            "${phone}",
+            "${startDate}"
+        );
+        `);
+    }
+}
+
+const seedCustomersTable = async() =>{    
+    try {
+        const dropTableQuery = `DROP TABLE IF EXISTS Customers`;
+        const createTableQuery = `CREATE TABLE Customers (
+            ID INT UNIQUE PRIMARY KEY AUTO_INCREMENT,
+            First_Name TEXT,
+            Last_Name TEXT,
+            Address TEXT,
+            Phone TEXT,
+            Start_Date DATE
+            )`;
+        await dpConnector.query(dropTableQuery);
+        await dpConnector.query(createTableQuery);
+        seedCustomers();
+        
+    } catch (err) {
+        console.error(err.message);
+    }
+}
+
 seedProductsTable();
 seedSalespersonsTable();
+seedCustomersTable();

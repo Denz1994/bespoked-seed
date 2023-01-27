@@ -206,5 +206,6 @@ const buildAllTables = async()=>{
 const startSeed = async()=>{
     await buildAllTables();
     await fillTables();
+    
 }
-startSeed();
+module.exports = {startSeed};

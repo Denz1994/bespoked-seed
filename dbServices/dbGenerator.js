@@ -4,7 +4,7 @@ const {faker} = require('@faker-js/faker');
 ROWS = 10;
 
 const seedProducts = async() => {
-    for(let i = 0; i < ROWS; i++){
+    for(let i = 0; i < ROWS*5; i++){
         manufacturer = faker.company.name();
         productName = faker.commerce.product();
 
@@ -47,10 +47,7 @@ const seedProductsTable = async() =>{
             Qty_On_Hand INT,
             Commission_Percentage FLOAT)`;
         await dpConnector.query(dropTableQuery);
-        await dpConnector.query(createTableQuery);
-        
-        seedProducts();
-        
+        await dpConnector.query(createTableQuery);        
     } catch (err) {
         console.error(err.message);
     }
@@ -67,7 +64,7 @@ const seedSalespersons = async() => {
         manager = faker.name.fullName();
 
         await dpConnector.query(`
-        INSERT INTO Salesperson (
+        INSERT INTO Salespersons (
             First_Name,
             Last_Name,
             Address,
@@ -91,8 +88,8 @@ const seedSalespersons = async() => {
 
 const seedSalespersonsTable = async() =>{    
     try {
-        const dropTableQuery = `DROP TABLE IF EXISTS Salesperson`;
-        const createTableQuery = `CREATE TABLE Salesperson (
+        const dropTableQuery = `DROP TABLE IF EXISTS Salespersons`;
+        const createTableQuery = `CREATE TABLE Salespersons (
             ID INT UNIQUE PRIMARY KEY AUTO_INCREMENT,
             First_Name TEXT,
             Last_Name TEXT,
@@ -104,7 +101,6 @@ const seedSalespersonsTable = async() =>{
             )`;
         await dpConnector.query(dropTableQuery);
         await dpConnector.query(createTableQuery);
-        seedSalespersons();
         
     } catch (err) {
         console.error(err.message);
@@ -112,7 +108,7 @@ const seedSalespersonsTable = async() =>{
 }
 
 const seedCustomers = async() => {
-    for(let i = 0; i < ROWS; i++){
+    for(let i = 0; i < ROWS*50; i++){
         firstName = faker.name.firstName();
         lastName = faker.name.lastName();
         address = faker.address.streetAddress();
@@ -151,13 +147,64 @@ const seedCustomersTable = async() =>{
             )`;
         await dpConnector.query(dropTableQuery);
         await dpConnector.query(createTableQuery);
-        seedCustomers();
         
     } catch (err) {
         console.error(err.message);
     }
 }
 
-seedProductsTable();
-seedSalespersonsTable();
-seedCustomersTable();
+const fillSales = async() => {
+    // for(let i = 0; i < ROWS; i++){
+
+        await dpConnector.query(`INSERT INTO Sales (Product) SELECT ID From Products;`);
+        await dpConnector.query(`INSERT INTO Sales (Salesperson) SELECT ID From Salespersons;`);
+        await dpConnector.query(`INSERT INTO Sales (Customer) SELECT ID From Customers;`);
+    // }
+}
+
+const buildSalesTable = async() =>{    
+    try {
+        const dropTableQuery = `DROP TABLE IF EXISTS Sales`;
+        const createTableQuery = `CREATE TABLE Sales(
+            ID INT UNIQUE PRIMARY KEY AUTO_INCREMENT,
+            Product TEXT NOT NULL REFERENCES Products(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+            Salesperson TEXT NOT NULL REFERENCES Salespersons(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+            Customer TEXT NOT NULL REFERENCES Customers(ID) ON DELETE CASCADE ON UPDATE CASCADE
+            )`;
+        await dpConnector.query(dropTableQuery);
+        await dpConnector.query(createTableQuery);
+        
+    } catch (err) {
+        console.error(err.message);
+    }
+}
+
+
+const fillTables= async()=>{
+    try{
+        console.log('Seeding DB Tables...')
+        await seedProducts();
+        await seedSalespersons();
+        await seedCustomers();
+        // await fillSales();
+
+        console.log('Seeded DB Tables...')
+    }
+    catch(err){
+        console.error(err.message)
+    }
+}
+const buildAllTables = async()=>{
+    console.log('Building DB Tables...');
+    await seedProductsTable();
+    await seedSalespersonsTable();
+    await seedCustomersTable();
+    await buildSalesTable();
+    console.log('Built DB Tables...');
+}
+
+const startSeed = async()=>{
+    await buildAllTables();
+    await fillTables();
+}
+startSeed();
